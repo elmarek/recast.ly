@@ -1,43 +1,52 @@
-import exampleVideoData from '../data/exampleVideoData.js';
-import VideoList from './VideoList.js';
-import VideoPlayer from './VideoPlayer.js';
+
 import Search from './Search.js';
+import VideoPlayer from './VideoPlayer.js';
+import VideoList from './VideoList.js';
 
-class App extends React.Component{
-
+class App extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      videos: exampleVideoData,
-      currentVideo: exampleVideoData[0],
+      videos: [],
+      currentVideo: null
     };
-    this.onVideoClick = this.onVideoClick.bind(this);
-
   }
 
-  onVideoClick(event) {
-    event.preventDefault();
-    console.dir(event.target);
-    //look for videoId
-    //console.dir(event.target.getAttribute('videoIdClick'));
-    var vidId = event.target.getAttribute('videoIdClick');
-    var vidList = this.state.videos;
-    console.log(vidList);
-    console.log(vidId);
+  componentDidMount() {
+    this.getYouTubeVideos('react tutorials');
+  }
 
-    var match = vidList.filter(video => video.id.videoId === vidId);
+  getYouTubeVideos(query) {
+    var options = {
+      key: this.props.API_KEY,
+      query: query
+    };
 
-    this.setState({currentVideo: match[0]});
+    this.props.searchYouTube(options, (videos) =>
+      this.setState({
+        videos: videos,
+        currentVideo: videos[0]
+      })
+    );
+  }
 
+  handleVideoListEntryTitleClick(video) {
+    this.setState({
+      currentVideo: video
+    });
   }
 
   render() {
     return (
       <div>
         <nav className="navbar">
-          <div className="col-md-6 offset-md-3">
-            <Search/>
+          <div className="row">
+            <div className="col-md-6 offset-md-3">
+              <Search
+                handleSearchInputChange={this.getYouTubeVideos.bind(this)}
+              />
+            </div>
           </div>
         </nav>
         <div className="row">
@@ -45,18 +54,97 @@ class App extends React.Component{
             <VideoPlayer video={this.state.currentVideo}/>
           </div>
           <div className="col-md-5">
+            {
+            /*
+            * It's very important to bind the context of this callback.
+            * Also acceptable is to pass a anonymous function expression with a fat
+            * arrow that inherits the surrounding lexical `this` context:
+            *
+            *   handleVideoListEntryTitleClick={(video) => this.onVideoListEntryClick(video)}
+            *                                  - or -
+            *   handleVideoListEntryTitleClick={(currentVideo) => this.setState({currentVideo})}
+            *
+            */
+            }
             <VideoList
+              handleVideoListEntryTitleClick={this.handleVideoListEntryTitleClick.bind(this)}
               videos={this.state.videos}
-              onVideoClick = {this.onVideoClick} />
+            />
           </div>
         </div>
       </div>
     );
   }
 }
+
 // In the ES6 spec, files are "modules" and do not share a top-level scope
 // `var` declarations will only exist globally where explicitly defined
 export default App;
+
+
+
+
+
+
+// import exampleVideoData from '../data/exampleVideoData.js';
+// import VideoList from './VideoList.js';
+// import VideoPlayer from './VideoPlayer.js';
+// import Search from './Search.js';
+
+// class App extends React.Component{
+
+//   constructor(props) {
+//     super(props);
+
+//     this.state = {
+//       videos: exampleVideoData,
+//       currentVideo: exampleVideoData[0],
+//     };
+//     this.onVideoClick = this.onVideoClick.bind(this);
+
+//   }
+
+//   onVideoClick(event) {
+//     event.preventDefault();
+//     console.dir(event.target);
+//     //look for videoId
+//     //console.dir(event.target.getAttribute('videoIdClick'));
+//     var vidId = event.target.getAttribute('videoIdClick');
+//     var vidList = this.state.videos;
+//     console.log(vidList);
+//     console.log(vidId);
+
+//     var match = vidList.filter(video => video.id.videoId === vidId);
+
+//     this.setState({currentVideo: match[0]});
+
+//   }
+
+//   render() {
+//     return (
+//       <div>
+//         <nav className="navbar">
+//           <div className="col-md-6 offset-md-3">
+//             <Search/>
+//           </div>
+//         </nav>
+//         <div className="row">
+//           <div className="col-md-7">
+//             <VideoPlayer video={this.state.currentVideo}/>
+//           </div>
+//           <div className="col-md-5">
+//             <VideoList
+//               videos={this.state.videos}
+//               onVideoClick = {this.onVideoClick} />
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+// }
+// // In the ES6 spec, files are "modules" and do not share a top-level scope
+// // `var` declarations will only exist globally where explicitly defined
+// export default App;
 
 
 
